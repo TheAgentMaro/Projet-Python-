@@ -8,8 +8,8 @@ class game:
     def __init__(self, size):
         self.size = size
         self.matrice = self.generate_empty_game()
-        self.coord = tuple
-        self.liste= list
+        self.coord = (0,1,2,3,4,5,6,7,8,9,10)
+        self.liste= [0,1,2,3,4,5,6,7,8,9,10]
         self.current_score = 0
 
     def setCoord(self, coord):
@@ -20,6 +20,7 @@ class game:
         
     def generate_empty_game(self):
         return [[0] * size for i in range(size)]
+    
     
     def aleatoire(self):
         for i in range(size):
@@ -32,6 +33,7 @@ class game:
                     self.matrice[i][j] = 3
                 elif random.random() < 0.05:
                     self.matrice[i][j] = 4
+        print(self.matrice)
     
     def existe_case_adj(self):  # parametres n ,  matrice a deux dimensions, i et j
         for i in range(size):
@@ -56,22 +58,27 @@ class game:
         return resultat
 
     def propagation(self):   # fonction pour calculer toutes les cases adjacentes d'une cellule
-        if 0 <= self.coord[0] < size and 0 <= self.coord[1] < size:
+        
+        if 0 <= self.coord[0] < size and 0 < self.coord[1] < size :
+            
             if self.coord[0] - 1 >= 0:
                 if self.matrice[self.coord[0] - 1][self.coord[1]] == self.matrice[self.coord[0]][self.coord[1]]:
                     if (self.coord[0] - 1, self.coord[1]) not in self.liste:
                         self.liste.append((self.coord[0] - 1, self.coord[1]))
                         self.propagation(size, self.matrice, (self.coord[0] - 1, self.coord[1]), self.liste)
+            
             if self.coord[0] + 1 < size:
                 if self.matrice[self.coord[0] + 1][self.coord[1]] == self.matrice[self.coord[0]][self.coord[1]]:
                     if (self.coord[0] + 1, self.coord[1]) not in self.liste:
                         self.liste.append((self.coord[0] + 1, self.coord[1]))
                         self.propagation(size, self.matrice, (self.coord[0] + 1, self.coord[1]), self.liste)
+            
             if self.coord[1] - 1 >= 0:
                 if self.matrice[self.coord[0]][self.coord[1] - 1] == self.matrice[self.coord[0]][self.coord[1]]:
                     if (self.coord[0], self.coord[1] - 1) not in self.liste:
                         self.liste.append((self.coord[0], self.coord[1] - 1))
                         self.propagation(size, self.matrice, (self.coord[0], self.coord[1] - 1), self.liste)
+            
             if self.coord[1] + 1 < size:
                 if self.matrice[self.coord[0]][self.coord[1] + 1] == self.matrice[self.coord[0]][self.coord[1]]:
                     if (self.coord[0], self.coord[1] + 1) not in self.liste:
@@ -79,10 +86,10 @@ class game:
                         self.propagation(size, self.matrice, (self.coord[0], self.coord[1] + 1), self.liste)
 
 
-    def modification(self , liste: list) : # fonction incrementer et pour mettre un 0 sur toutes cases adjacentes qu'on a trouvé
-        self.matrice[liste[0][0]][liste[0][1]] += 1
-        for i in range(1, len(liste)):
-            self.matrice[liste[i][0]][liste[i][1]] = 0
+    def modification(self) : # fonction incrementer et pour mettre un 0 sur toutes cases adjacentes qu'on a trouvé
+        self.matrice[self.liste[0][0]][self.liste[0][1]] += 1
+        for i in range(1, len(self.liste)):
+            self.matrice[self.liste[i][0]][self.liste[i][1]] = 0
 
     def gravity(self) :            # pour deplacer les cases vers le bas s'il ya des 0 et ajouter de nouvelles valeurs aleatoires
         for i in range(size):
@@ -236,8 +243,10 @@ class GUI:
         key_value = event.keysym
         print('{} Mouse Left Click Pressed'.format(key_value))
         self.click()
-        self.paint()
         print('Score: {}'.format(self.game.current_score))
+        if  self.game.existe_case_adj():
+            self.add_start_matrice
+        self.paint()
         if self.game.found_10():
             return self.you_win()
 
@@ -246,6 +255,7 @@ class GUI:
             self.game.modification()    #appelle procedure modification pour incrementer et mettre les 0
             self.game.gravity()     #appelle procedure gravity  
             self.game.display()
+            print(self.matrice)
         elif not self.game.reste_coup():
             return self.game_over
     
@@ -253,14 +263,12 @@ class GUI:
         if not self.won:
             self.won = True
             print('You Win!')
-            if messagebox.askyesno('Get10Game', 'You Win!\n'
-                                       'Are you going to continue the Get10Game game?'):
+            if messagebox.askyesno('Get10Game', 'You Win!\n' 'Are you going to continue the Get10Game game?'):
                 self.keep_playing = True
 
     def game_over(self):
         print('Game over!')
-        messagebox.showinfo('Get10Game', 'Oops!\n'
-                                    'Game over!')
+        messagebox.showinfo('Get10Game', 'Game over!')
         
 if __name__ == '__main__':
     size = 6
