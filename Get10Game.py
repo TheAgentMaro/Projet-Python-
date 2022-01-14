@@ -8,8 +8,8 @@ class game:
     def __init__(self, size):
         self.size = size
         self.matrice = self.generate_empty_game()
-        self.coord = (0,1,2,3,4,5,6,7,8,9,10)
-        self.liste= [0,1,2,3,4,5,6,7,8,9,10]
+        self.coord = ()
+        self.liste= []
         self.current_score = 0
 
     def setCoord(self, coord):
@@ -59,37 +59,38 @@ class game:
 
     def propagation(self):   # fonction pour calculer toutes les cases adjacentes d'une cellule
         
-        if 0 <= self.coord[0] < size and 0 < self.coord[1] < size :
-            
-            if self.coord[0] - 1 >= 0:
-                if self.matrice[self.coord[0] - 1][self.coord[1]] == self.matrice[self.coord[0]][self.coord[1]]:
-                    if (self.coord[0] - 1, self.coord[1]) not in self.liste:
-                        self.liste.append((self.coord[0] - 1, self.coord[1]))
-                        self.propagation(size, self.matrice, (self.coord[0] - 1, self.coord[1]), self.liste)
-            
-            if self.coord[0] + 1 < size:
-                if self.matrice[self.coord[0] + 1][self.coord[1]] == self.matrice[self.coord[0]][self.coord[1]]:
-                    if (self.coord[0] + 1, self.coord[1]) not in self.liste:
-                        self.liste.append((self.coord[0] + 1, self.coord[1]))
-                        self.propagation(size, self.matrice, (self.coord[0] + 1, self.coord[1]), self.liste)
-            
-            if self.coord[1] - 1 >= 0:
-                if self.matrice[self.coord[0]][self.coord[1] - 1] == self.matrice[self.coord[0]][self.coord[1]]:
-                    if (self.coord[0], self.coord[1] - 1) not in self.liste:
-                        self.liste.append((self.coord[0], self.coord[1] - 1))
-                        self.propagation(size, self.matrice, (self.coord[0], self.coord[1] - 1), self.liste)
-            
-            if self.coord[1] + 1 < size:
-                if self.matrice[self.coord[0]][self.coord[1] + 1] == self.matrice[self.coord[0]][self.coord[1]]:
-                    if (self.coord[0], self.coord[1] + 1) not in self.liste:
-                        self.liste.append((self.coord[0], self.coord[1] + 1))
-                        self.propagation(size, self.matrice, (self.coord[0], self.coord[1] + 1), self.liste)
+        for self.coord in self.liste:
+            i = self.coord[0]
+            j = self.coord[1]
+            number = self.matrice[i][j]
+            if i > 0:
+                if self.matrice[i-1][j] == number and (i-1, j) not in self.liste: #it also checks if the coordinates is in the list or not
+                    self.liste.append((i-1,j))
+            if i < (size-1):    
+                if self.matrice[i+1][j] == number and (i+1, j) not in self.liste:
+                    self.liste.append((i+1,j))
+            if j > 0:    
+                if self.matrice[i][j-1] == number and (i, j-1) not in self.liste:
+                    self.liste.append((i,j-1))
+            if j < (size-1):        
+                if self.matrice[i][j+1] == number and (i, j+1) not in self.liste:
+                    self.liste.append((i,j+1))
+        return self.liste
 
 
     def modification(self) : # fonction incrementer et pour mettre un 0 sur toutes cases adjacentes qu'on a trouvé
-        self.matrice[self.liste[0][0]][self.liste[0][1]] += 1
-        for i in range(1, len(self.liste)):
-            self.matrice[self.liste[i][0]][self.liste[i][1]] = 0
+        i,j= self.liste[0]
+        #the value is here incremented by 1
+        self.matrice[i][j] =+ 1
+
+        #here all the values of the other coordinates in the self.liste are set to 0
+        for coordinates in self.liste[1:]:
+            i = coordinates[0]
+            j = coordinates[1]
+            self.matrice[i][j] = 0
+        
+        return self.matrice
+            
 
     def gravity(self) :            # pour deplacer les cases vers le bas s'il ya des 0 et ajouter de nouvelles valeurs aleatoires
         for i in range(size):
@@ -120,6 +121,7 @@ class game:
                         self.matrice[2][j] = self.matrice[i - 4][j]
                         self.matrice[1][j] = self.matrice[i - 5][j]
                         self.matrice[0][j] = 0
+        self.current_score += self.matrice[i][j]
         for p in range(size):
             for m in range(size):
                 if self.matrice[p][m] == 0:
@@ -252,10 +254,12 @@ class GUI:
 
     def click(self):
         if  self.game.existe_case_adj():
+            self.game.liste=self.game.propagation()
             self.game.modification()    #appelle procedure modification pour incrementer et mettre les 0
             self.game.gravity()     #appelle procedure gravity  
             self.game.display()
             print(self.matrice)
+            self.paint()
         elif not self.game.reste_coup():
             return self.game_over
     
