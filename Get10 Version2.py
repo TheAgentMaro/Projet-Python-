@@ -36,7 +36,8 @@ class game:
         self.liste= []
         self.current_score = 0
 
-
+    def set_matrice(self, matrice):
+        self.matrice = matrice
     
     def existe_case_adj(self):  # parametres n ,  matrice a deux dimensions, i et j
         for i in range(size):
@@ -81,10 +82,10 @@ class game:
 
 
     def modification(self) : # fonction incrementer et pour mettre un 0 sur toutes cases adjacentes qu'on a trouvé
-        i= self.liste[0][0]
-        j= self.liste[0][1]
+        i= self.liste[0]
+        j= self.liste[1]
         #the value is here incremented by 1
-        
+        self.matrice=+1
         #here all the values of the other coordinates in the self.liste are set to 0
         for coordinates in self.liste[1:]:
             i = coordinates[0]
@@ -138,9 +139,6 @@ class game:
         return False
 
 
-    def set_matrice(self, matrice):
-        self.matrice = matrice
-
     def display(self):
         for n in self.matrice:
             for number in n:
@@ -156,7 +154,7 @@ class GUI:
     marge_haut = SIZE / 5  
     game_LEN = 4
     game_PADDING = 10
-    CELL_PADDING = 5
+    CELL_PADDING = 1
     BACKGROUND_COLOR = '#f9f6f2'
     SCORE_FONT = "Helvetica", 32, "bold"
     CELL_BACKGROUND_COLOR_DICT = {
@@ -191,6 +189,7 @@ class GUI:
     def __init__(self, game):
         self.game = game
         self.window = Tk()
+        self.window.title('Just Get 10')
         self.window.resizable(False, False)
         self.background = Frame(self.window, bg=GUI.BACKGROUND_COLOR)
         self.cell_labels = []
@@ -199,7 +198,7 @@ class GUI:
             for j in range(self.game.size):
                 label = Label(self.background, text='',
                                  justify=CENTER, font=GUI.FONT,
-                                 width=4, height=2)
+                                 width=4, height=2, padx=1, pady=1)
                 label.grid(row=i, column=j)
                 row_labels.append(label)
             self.cell_labels.append(row_labels)
@@ -229,29 +228,29 @@ class GUI:
         taillex = GUI.SIZE + (self.game.size * GUI.CELL_PADDING )  #calcule la longueur de la grille + sa marge gauche
         tailley = GUI.SIZE + (self.game.size *  GUI.CELL_PADDING)    #calcule la hauteur de la grille + sa marge haut
         if x >= 0 and x < taillex and y >= 0 and y < tailley :  #test pour connaitre si on a cliqué a l'interieur de la grille
-            i = int((y - GUI.SIZE)/GUI.CELL_PADDING)            # on calcule a partir du y de la souris(qui est en pixel ) le i de la case selectionnée
-            j = int((x - GUI.SIZE) / GUI.CELL_PADDING)  
+            i = int(y / GUI.CELL_PADDING)            # on calcule a partir du y de la souris(qui est en pixel ) le i de la case selectionnée
+            j = int(x  / GUI.CELL_PADDING)  
             current = (i, j)                                 # c'est la case selectionée
             L = [current]
             print(L)
-        self.game.propagation()
+        L = self.click()
         self.game.liste=[(i,j)]              
         key_value = event.keysym
         print('{} Mouse Left Click Pressed'.format(key_value))
-        self.click()
         print('Score: {}'.format(self.game.current_score))
+        self.window.update()
         self.paint()
+        print(self.game.matrice)
+        
         if self.game.found_10():
             return self.you_win()
 
     def click(self):
         if  self.game.existe_case_adj() == True :
+            self.game.propagation()
             self.game.modification()    #appelle procedure modification pour incrementer et mettre les 0
             self.game.gravity()     #appelle procedure gravity  
             self.game.display()
-            self.window.update()
-            self.paint()
-            print(self.game.matrice)
         else:
             return self.game_over
     
@@ -259,7 +258,7 @@ class GUI:
         if not self.won:
             self.won = True
             print('You Win!')
-            if messagebox.askyesno('Get10Game', 'You Win!\n' 'Are you going to continue the Get10Game game?'):
+            if messagebox.askyesno('Get10Game', 'You Win!\n' 'Are you going to continue the Get10Game ?'):
                 self.keep_playing = True
 
     def game_over(self):
