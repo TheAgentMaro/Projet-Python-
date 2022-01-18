@@ -31,7 +31,7 @@ class game:
         self.size = size
         self.plateau = newBoard(n , proba)
         print(self.plateau)
-        self.coord = []
+        self.liste2 = []
         self.liste= [0]*size
         self.current_score = self.score()
 
@@ -63,11 +63,11 @@ class game:
 
     def propagation(self):   # fonction pour calculer toutes les cases adjacentes d'une cellule
         if self.existe_case_adj():
-            for self.coord in self.liste:
+            for self.liste2 in self.liste:
                 i = self.liste[0]
                 j = self.liste[1]
                 if i > 0:
-                    if self.plateau[i-1][j] == self.plateau[i][j] and (i-1, j) not in self.liste: #it also checks if the coordinates is in the list or not
+                    if self.plateau[i-1][j] == self.plateau[i][j] and (i-1, j) not in self.liste: #it also checks if the liste2inates is in the list or not
                         self.liste.append((i-1,j))
                 if i < (size-1):    
                     if self.plateau[i+1][j] == self.plateau[i][j] and (i+1, j) not in self.liste:
@@ -88,7 +88,7 @@ class game:
         j= self.liste[1]
         #valeur incrementer par 1
         self.plateau[i][j]=+1
-        #ici toutes les valeurs des autres coordonnées dans la liste self.sont mises à 0
+        #ici toutes les valeurs des autres liste2onnées dans la liste self.sont mises à 0
         for i in range(1, len(self.liste)):
             
             self.plateau[self.liste[0]][self.liste[1]] = 0
@@ -206,10 +206,10 @@ class GUI:
                 ligne.append(label)
             self.case.append(ligne)
         self.background.pack(side=TOP)
-        self.start_plateau_num = self.game.size
         self.window.bind("<Button-1>" , self.Leftclick)
         self.paint()
         self.window.mainloop()
+
     
     
     def paint(self):
@@ -228,38 +228,32 @@ class GUI:
     def Leftclick(self, event):
         for i in range(self.game.size):
             for j in range(self.game.size):
-                self.case=self.game.plateau[i][j]
+                self.case[i][j]=self.game.plateau[i][j]
         x, y = event.x, event.y
         print('{}, {}'.format(x, y))
+        key_value = event.keysym
+        print('{} Click!'.format(key_value))
         taillex = (self.game.size * GUI.CELL_PADDING )  #calcule la longueur de la grille 
         tailley = (self.game.size *  GUI.CELL_PADDING)    #calcule la hauteur de la grille 
         if x >= 0 and x < taillex and y >= 0 and y < tailley :  #test pour connaitre si on a cliqué a l'interieur de la grille
-            i = int(y / self.game.size)            # on calcule a partir du y le i de la case selectionnée
-            j = int(x  / self.game.size)  
+            i = int(y / GUI.CELL_PADDING)            # on calcule a partir du y le i de la case selectionnée
+            j = int(x  / GUI.CELL_PADDING)  
             current = (i, j)                                 # c'est la case selectionée
-            L = [current]
-            print(L)
-        
-        L = self.click()
-                 
-        key_value = event.keysym
-        print('{} Mouse Left Click Pressed'.format(key_value))
+            L = current
+            self.game.propagation(L)
+            print(L) 
+        self.window.update()
+        if self.game.reste_coup() == True : 
+                self.game.update()    #appelle procedure update pour incrementer et mettre les 0
+                self.game.down()     #appelle procedure down
+                self.game.display() #display
+        elif self.game.found_10():
+            return self.you_win()
+        else:
+            return self.game_over()
         
         print('Score: {}'.format(self.game.current_score))
         
-        if self.game.found_10():
-            return self.you_win()
-
-    def click(self):
-        while self.game.reste_coup() == True :
-            self.game.propagation() # apelle fonction propagation pour calculer toutes les cases adjacentes d'une cellule
-            self.game.update()    #appelle procedure update pour incrementer et mettre les 0
-            self.game.down()     #appelle procedure down
-            self.game.display() #display
-            self.window.update()
-            print(self.game.plateau)
-        else:
-            return self.game_over
     
     def you_win(self):
         if not self.won:
