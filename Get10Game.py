@@ -31,8 +31,8 @@ class game:
         self.size = size
         self.plateau = newBoard(n , proba)
         print(self.plateau)
-        self.liste2 = [0]*size
-        self.liste= [0]*size
+        self.liste2 = [1,2,3,4,5,6,7,8,9,10]
+        self.liste= [1,2,3,4,5,6,7,8,9,10]
         self.current_score = self.score()
     
                  
@@ -92,7 +92,7 @@ class game:
                             self.liste.append(tupleToAdd)
             index += 1
             if(index >= len(self.liste)):
-                print("Liste Envoyée:", self.liste)
+                print("Liste:", self.liste)
                 return self.liste
 
         
@@ -213,6 +213,7 @@ class GUI:
         self.game = game
         #Initialisation Fenétre tkinter
         self.window = Tk()
+        self.window.iconbitmap('get10.ico') #Icon
         '''Ouvrir la fenetre, donner un titre, et définir la taille de la fenetre'''
         self.window.title('Just Get 10')
         self.window.resizable(False, False)
@@ -267,6 +268,7 @@ class GUI:
             self.game.update()    #appelle procedure update pour incrementer et mettre les 0
             self.game.down()     #appelle procedure down
             self.game.display() #display
+            self.game.plateau[i][j]=self.game.liste
             self.window.update()
         elif self.game.reste_coup() == False:
             return self.game_over()
