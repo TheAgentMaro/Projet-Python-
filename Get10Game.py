@@ -217,17 +217,17 @@ class GUI:
         self.frame.config(width=500, height=500)
         self.frame.grid(row=0, column=0, rowspan=3)
         self.frame.pack(side=LEFT)
-
-        self.case = []
+        
+        self.case = [] #Zone des cases (colonne)
         for i in range(self.game.size):
-            ligne = []
+            ligne = [] #(ligne)
             for j in range(self.game.size):
-                label = Label(self.frame, text='',
+                label = Label(self.frame, text='', #Design des cases 
                                  justify=CENTER, font=GUI.FONT,
                                  width=4, height=2)
                 label.grid(row=i, column=j)
                 ligne.append(label)
-            self.case.append(ligne)
+            self.case.append(ligne) #append colonne + ligne 
         #event du souris en  clic
         
     #Remplir les cases avec les couleurs
