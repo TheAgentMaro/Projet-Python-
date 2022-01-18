@@ -65,7 +65,7 @@ class game:
         if self.existe_case_adj():
             for self.coord in self.liste:
                 i = self.liste[0]
-                j = self.liste[0]
+                j = self.liste[1]
                 if i > 0:
                     if self.plateau[i-1][j] == self.plateau[i][j] and (i-1, j) not in self.liste: #it also checks if the coordinates is in the list or not
                         self.liste.append((i-1,j))
@@ -82,22 +82,22 @@ class game:
         
 
 
-    def modification(self) : # fonction incrementer et pour mettre un 0 sur toutes cases adjacentes qu'on a trouvé
+    def update(self) : # fonction incrementer et pour mettre un 0 sur toutes cases adjacentes qu'on a trouvé
         print(self.liste)
         i= self.liste[0]
         j= self.liste[1]
-        #the value is here incremented by 1
+        #valeur incrementer par 1
         self.plateau[i][j]=+1
-        #here all the values of the other coordinates in the self.liste are set to 0
+        #ici toutes les valeurs des autres coordonnées dans la liste self.sont mises à 0
         for i in range(1, len(self.liste)):
-            coordinates = self.liste[i]
-            self.plateau[coordinates[1]][coordinates[0]] = 0
+            
+            self.plateau[self.liste[0]][self.liste[1]] = 0
         
         return self.plateau
             
 
-    def gravity(self) :            # pour deplacer les cases vers le bas s'il ya des 0 et ajouter de nouvelles valeurs aleatoires
-        print(self.plateau)
+    def down(self) :            # pour deplacer les cases vers le bas s'il ya des 0 et ajouter de nouvelles valeurs aleatoires
+        
         for i in range(size):
             for j in range(size):
                 if self.plateau[i][j] == 0 and i >= 1:
@@ -220,17 +220,20 @@ class GUI:
                     self.cell_labels[i][j].configure(
                         text=cell_text,
                         bg=bg_color, fg=fg_color)
-        self.cell_labels=self.game.plateau[i][j]
+        
 
 
 
     def Leftclick(self, event):
+        for i in range(self.game.size):
+            for j in range(self.game.size):
+                self.cell_labels=self.game.plateau[i][j]
         x, y = event.x, event.y
         print('{}, {}'.format(x, y))
-        taillex = (self.game.size * GUI.CELL_PADDING )  #calcule la longueur de la grille + sa marge gauche
-        tailley = (self.game.size *  GUI.CELL_PADDING)    #calcule la hauteur de la grille + sa marge haut
+        taillex = (self.game.size * GUI.CELL_PADDING )  #calcule la longueur de la grille 
+        tailley = (self.game.size *  GUI.CELL_PADDING)    #calcule la hauteur de la grille 
         if x >= 0 and x < taillex and y >= 0 and y < tailley :  #test pour connaitre si on a cliqué a l'interieur de la grille
-            i = int(y / self.game.size)            # on calcule a partir du y de la souris(qui est en pixel ) le i de la case selectionnée
+            i = int(y / self.game.size)            # on calcule a partir du y le i de la case selectionnée
             j = int(x  / self.game.size)  
             current = (i, j)                                 # c'est la case selectionée
             L = [current]
@@ -247,10 +250,10 @@ class GUI:
             return self.you_win()
 
     def click(self):
-        if  self.game.existe_case_adj() == True :
+        if  self.game.reste_coup() == True :
             self.game.propagation()
-            self.game.modification()    #appelle procedure modification pour incrementer et mettre les 0
-            self.game.gravity()     #appelle procedure gravity
+            self.game.update()    #appelle procedure update pour incrementer et mettre les 0
+            self.game.down()     #appelle procedure down
             self.window.update()  
             self.game.display()
             self.window.update()
