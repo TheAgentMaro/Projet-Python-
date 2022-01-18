@@ -31,8 +31,8 @@ class game:
         self.size = size
         self.plateau = newBoard(n , proba)
         print(self.plateau)
-        self.liste2 = [1,2,3,4,5,6,7,8,9,10]
-        self.liste= [1,2,3,4,5,6,7,8,9,10]
+        self.liste2 = (0,0)
+        self.liste= [0,0]
         self.current_score = self.score()
     
                  
@@ -67,39 +67,35 @@ class game:
         index = 0
         i = self.liste2[0]
         j = self.liste2[1]
-        while(self.adjacent()):
+        while self.adjacent():
             if((0 <= i < n) and (0 <= j < n)):
-                tupleToAdd = 0
+                stock = 0
                 if((j - 1) >= 0):
                     if(self.plateau[j - 1][i] == self.plateau[j][i]):
-                        tupleToAdd = (i, (j - 1))
-                        if(tupleToAdd not in self.liste):
-                            self.liste.append(tupleToAdd)
+                        stock = (i, (j - 1))
+                        if(stock not in self.liste):
+                            self.liste.append(stock)
                 if((i - 1) >= 0):
                     if(self.plateau[j][i - 1] == self.plateau[j][i]):
-                        tupleToAdd = ((i - 1), j)
-                        if(tupleToAdd not in self.liste):
-                            self.liste.append(tupleToAdd)
+                        stock = ((i - 1), j)
+                        if(stock not in self.liste):
+                            self.liste.append(stock)
                 if((i + 1) < n):
                     if(self.plateau[j][i + 1] == self.plateau[j][i]):
-                        tupleToAdd = ((i + 1), j)
-                        if(tupleToAdd not in self.liste):
-                            self.liste.append(tupleToAdd)
+                        stock = ((i + 1), j)
+                        if(stock not in self.liste):
+                            self.liste.append(stock)
                 if((j + 1) < n):
                     if(self.plateau[j + 1][i] == self.plateau[j][i]):
-                        tupleToAdd = (i, (j + 1))
-                        if(tupleToAdd not in self.liste):
-                            self.liste.append(tupleToAdd)
+                        stock = (i, (j + 1))
+                        if(stock not in self.liste):
+                            self.liste.append(stock)
             index += 1
             if(index >= len(self.liste)):
                 print("Liste:", self.liste)
                 return self.liste
 
-        
-
-
     def update(self) : # fonction incrementer et pour mettre un 0 sur toutes cases adjacentes qu'on a trouvé
-        print(self.liste)
         i= self.liste[0]
         j= self.liste[1]
         #valeur incrementer par 1
@@ -233,9 +229,7 @@ class GUI:
                 ligne.append(label)
             self.case.append(ligne)
         #event du souris en  clic
-        self.window.bind("<Button-1>" , self.Leftclick)
-        self.paint()
-        self.window.mainloop()
+        
     #Remplir les cases avec les couleurs
     def paint(self):
         for i in range(self.game.size):
@@ -246,36 +240,37 @@ class GUI:
                     self.case[i][j].configure(
                         text=cell_text,
                         bg=bg_color, fg=fg_color)
+    #Fonction d'exuction       
+    def start(self):
+        self.paint()
+        self.window.bind("<Button-1>" , self.Leftclick)
+        self.window.update()
+        self.window.mainloop()
+        
+
+    
     #Fonction principale du processus de jeu
-    def Leftclick(self, event):
-        for i in range(self.game.size):
-            for j in range(self.game.size):
-                self.case[i][j]=self.game.plateau[i][j]
+    def Leftclick(self,event):
         x, y = event.x, event.y
         print('{}, {}'.format(x, y))
         key_value = event.keysym
-        print('{} Click!'.format(key_value))
-        taillex = (self.game.size * GUI.CELL_PADDING )  #calcule la longueur de la grille 
-        tailley = (self.game.size *  GUI.CELL_PADDING)    #calcule la hauteur de la grille 
-        if x >= 0 and x < taillex and y >= 0 and y < tailley :  #test pour connaitre si on a cliqué a l'interieur de la grille
-            i = int(y / 8)            # on calcule a partir du y le i de la case selectionnée
-            j = int(x  / 8)  
-            current = (i, j)                                 # c'est la case selectionée
-            C = current
-        if self.game.adjacent() == True : 
-            C = self.game.propagation()
-            print(C) 
-            self.game.update()    #appelle procedure update pour incrementer et mettre les 0
-            self.game.down()     #appelle procedure down
-            self.game.display() #display
-            self.game.plateau[i][j]=self.game.liste
-            self.window.update()
+        print('{} Clicked!'.format(key_value))
+        (i, j) = (event.x // 8, event.y // 8)
+        current = (i, j)                                 # c'est la case selectionée
+        C = current
+        print(C)
+        if self.game.plateau is not None:
+            if self.game.adjacent() == True : 
+                C = self.game.propagation()
+                C = self.game.update()    #appelle procedure update pour incrementer et mettre les 0
+                C = self.game.down()     #appelle procedure down
+                self.game.display() #display
         elif self.game.reste_coup() == False:
             return self.game_over()
         elif self.game.found_10()== True:
             return  self.you_win()
-        self.window.update()
         print('Score: {}'.format(self.game.current_score))
+        
         
     #Win + msg box tkinter
     def you_win(self):
@@ -291,7 +286,8 @@ class GUI:
         
 if __name__ == '__main__':
     proba = (0.05, 0.25, 0.3, 0.4)
-    n=6
-    size = 6
+    n=5
+    size = 5
     game = game(size)
     panel = GUI(game)
+    panel.start()
